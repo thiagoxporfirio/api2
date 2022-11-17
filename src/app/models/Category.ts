@@ -1,12 +1,13 @@
 import { model, Schema } from 'mongoose';
 
-export const Category = model('Category', new Schema({
-    name:{
-        type: String,
-        required: true,
+export const Category = model('Category',new Schema({
+    name: {
+      required: true,
+      type: String,
     },
     icon: {
-        type: String,
-        required: true,
+      required: true,
+      type: String,
     },
-}));
+  })
+);

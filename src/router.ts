@@ -1,64 +1,44 @@
-import path from 'node:path'
-import { Router} from "express";
-import multer from 'multer'
+import { Router } from 'express';
+import multer from 'multer';
+import path from 'node:path';
 
-import { createCategory } from "./app/models/useCases/categories/createCategory";
-import { listCategories } from "./app/models/useCases/categories/listCategories";
-import { createProducts } from "./app/models/useCases/categories/products/createProducts";
-import { listProducts } from "./app/models/useCases/categories/products/listProducts";
-import { listProductsByCategory } from './app/models/useCases/categories/listProductsByCategory';
-import { listOrder } from './app/models/useCases/categories/order/listOrders';
-import { createOrder } from './app/models/useCases/categories/order/createOrders';
-import { changeOrderStatus } from './app/models/useCases/categories/order/changeOrderStatus';
+import { createCategory } from './app/useCases/categories/createCategory';
+import { listCategories } from './app/useCases/categories/listCategories';
+import { listProductsByCategory } from './app/useCases/categories/listProductsByCategory';
+import { cancelOrder } from './app/useCases/orders/cancelOrder';
+import { changeOrderStatus } from './app/useCases/orders/changeOrderStatus';
+import { createOrder } from './app/useCases/orders/createOrder';
+import { listOrders } from './app/useCases/orders/listOrders';
+import { createProduct } from './app/useCases/products/createProduct';
+import { listProducts } from './app/useCases/products/listProducts';
 
 export const router = Router();
 
 const upload = multer({
-    storage: multer.diskStorage({
-        destination(req, file, callback){
-            callback(null, path.resolve(__dirname, '..', 'uploads'))
-        },
-        filename(req, file, callbak){
-            callbak(null, `${Date.now()}-${file.originalname}`)
-        },
-    })
-})
+  storage: multer.diskStorage({
+    destination(_request, _file, callback) {
+      callback(null, path.resolve(__dirname, '..', 'uploads'));
+    },
+    filename(_request, file, callback) {
+      callback(null, `${Date.now()}_${file.originalname}`);
+    },
+  }),
+});
 
-//list categories
-router.get('/categories', (listCategories))
+router.get('/categories', listCategories);
 
-//create category
-router.post('/categories', (createCategory))
+router.get('/categories/:categoryId/products', listProductsByCategory);
 
+router.post('/categories', createCategory);
 
-//List products
-router.get('/products', listProducts)
+router.get('/products', listProducts);
 
+router.post('/products', upload.single('image'), createProduct);
 
+router.get('/orders', listOrders);
 
-//Create product
-router.post('/products', upload.single('image'), createProducts)
+router.post('/orders', createOrder);
 
+router.patch('/orders/:orderId', changeOrderStatus);
 
-//Get products by category
-router.get('/categories/:categoryId/products', listProductsByCategory)
-
-//List orders
-router.get('/orders', listOrder)
-
-
-
-//Create order
-router.post('/orders', createOrder)
-
-
-//Change order status
-router.patch('/oders/:orderId', changeOrderStatus)
-
-
-//Delete / cancel order
-router.delete('/oders/:orderId', (req, res) => {
-    res.send('OK')
-
-})
-
+router.delete('/orders/:orderId', cancelOrder);
